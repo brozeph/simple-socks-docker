@@ -1,39 +1,76 @@
+import settingsLib from 'settings-lib';
 import socks5 from 'simple-socks';
+import winston from 'winston';
 
-module.exports = (async (server) => {
+async function loadSettings () {
+	return await settingsLib.initialize({
+		baseSettingsPath : './settings/defaults.yml'
+	})
+}
 
-	server.listen(1080);
+function prepareLogger (settings) {
+	return winston.createLogger({
+		format : winston.format.combine(
+			winston.format.colorize(),
+			winston.format.splat(),
+			winston.format.timestamp(),
+			winston.format.prettyPrint(),
+			winston.format.printf((info) => {
+				if (typeof info.message !== 'string') {
+					return `${info.timestamp} [${info.level}]: ${JSON.stringify(info.message, 0, 2)}`;
+				}
 
-	server.on('handshake', function (socket) {
-		console.log();
-		console.log('------------------------------------------------------------');
-		console.log('new socks5 client from %s:%d', socket.remoteAddress, socket.remotePort);
+				return `${info.timestamp} [${info.level}]: ${info.message}`;
+			})),
+		level : settings.logging.level,
+		transports : [
+			new winston.transports.Console()
+		]
+	});
+}
+
+module.exports = (async (app) => {
+	app.settings = await loadSettings();
+	app.log = prepareLogger(app.settings);
+
+	// log out settings to verbose
+	app.log.verbose('SOCKS5 server settings loaded...')
+	app.log.verbose(app.settings);
+
+	// begin listening for inbound connections
+	app.server.listen(app.settings.server.port);
+	app.log.info('SOCKS5 server listening on %d', app.settings.server.port);
+
+	// when a new connection occurs
+	app.server.on(socks5.events.HANDSHAKE, function (socket) {
+		app.log.debug('new SOCKS5 request from %s:%d', socket.remoteAddress, socket.remotePort);
 	});
 
-	// When a reqest arrives for a remote destination
-	server.on('proxyConnect', function (info, destination) {
-		console.log('connected to remote server at %s:%d', info.host, info.port);
+	// when a request is received for a remote destination
+	app.server.on(socks5.events.PROXY_CONNECT, function (info, destination) {
+		app.log.debug('connected to remote server at %s:%d', info.host, info.port);
 
 		destination.on('data', function (data) {
-			console.log(data.length);
+			app.log.silly('data (%d bytes) received from remote server', data.length);
 		});
 	});
 
-	server.on('proxyData', function (data) {
-		console.log(data.length);
+	// when data is communicated to the client
+	app.server.on(socks5.events.PROXY_DATA, function (data) {
+		app.log.silly('data (%d bytes) sent to connected client', data.length);
 	});
 
-	// When an error occurs connecting to remote destination
-	server.on('proxyError', function (err) {
-		console.error('unable to connect to remote server');
-		console.error(err);
+	// when an error occurs connecting to remote destination
+	app.server.on(socks5.events.PROXY_ERROR, function (err) {
+		app.log.warning('unable to connect to remote server');
+		app.log.warning(err);
 	});
 
-	// When a proxy connection ends
-	server.on('proxyEnd', function (response, args) {
-		console.log('socket closed with code %d', response);
-		console.log(args);
-		console.log();
+	// when a proxy connection ends
+	app.server.on(socks5.events.PROXY_END, function (response, args) {
+		app.log.verbose('socket closed with code %d', response, args);
 	});
 
-})(socks5.createServer());
+})({
+	server : socks5.createServer()
+});

@@ -1,0 +1,4 @@
+logging:
+  level: silly
+server:
+  port: 1080
