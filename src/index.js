@@ -4,7 +4,13 @@ import winston from 'winston';
 
 async function loadSettings () {
 	return await settingsLib.initialize({
-		baseSettingsPath : './settings/defaults.yml'
+		baseSettingsPath : './settings/defaults.yml',
+		readEnvironmentMap : {
+			LOGGING_LEVEL : 'logging.level',
+			SERVER_HOST : 'server.host',
+			SERVER_PORT : 'server.port'
+		},
+		strict : true
 	})
 }
 
@@ -38,8 +44,11 @@ module.exports = (async (app) => {
 	app.log.verbose(app.settings);
 
 	// begin listening for inbound connections
-	app.server.listen(app.settings.server.port);
-	app.log.info('SOCKS5 server listening on %d', app.settings.server.port);
+	app.server.listen(app.settings.server.port, app.settings.server.host);
+	app.log.info(
+		'SOCKS5 server listening on %s:%d',
+		app.settings.server.host,
+		app.settings.server.port);
 
 	// when a new connection occurs
 	app.server.on(socks5.events.HANDSHAKE, function (socket) {

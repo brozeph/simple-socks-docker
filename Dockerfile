@@ -1,6 +1,6 @@
 # docker build command
 
-# docker build -t brozeph/simple-socks:latest ./docker
+# docker build -t brozeph/simple-socks ./docker
 
 # Build
 # * build all npm modules
@@ -17,11 +17,12 @@ LABEL authors = "Joshua Thomas <github.com/brozeph>"
 
 ENV APP_NAME simple-socks
 ENV APP_ROOT /opt
+
 WORKDIR $APP_ROOT/$APP_NAME
 
 # create directories
-RUN echo http://dl-cdn.alpinelinux.org/alpine/$ALPINE_VERSION/main >> /etc/apk/repositories && \
-		echo http://dl-cdn.alpinelinux.org/alpine/$ALPINE_VERSION/community >> /etc/apk/repositories && \
+RUN echo http://dl-cdn.alpinelinux.org/alpine/v3.8/main >> /etc/apk/repositories && \
+		echo http://dl-cdn.alpinelinux.org/alpine/v3.8/community >> /etc/apk/repositories && \
 		mkdir -p $APP_ROOT/$APP_NAME && \
 		apk update && \
 		apk add --no-cache gcc make python
@@ -55,7 +56,7 @@ FROM  node:$NODE_JS_VERSION-alpine
 
 USER root
 
-ENV APP_NAME broadcast-svc
+ENV APP_NAME simple-socks
 ENV APP_ROOT /opt
 WORKDIR $APP_ROOT/$APP_NAME
 
@@ -63,7 +64,7 @@ RUN mkdir -p $APP_ROOT/$APP_NAME
 
 ADD ./package.json .
 ADD ./.babelrc .
-COPY --from=base-build $HOME/$DIR_NAME/node_modules ./node_modules
-COPY --from=base-build $HOME/$DIR_NAME/dist ./dist
+COPY --from=base-build $APP_ROOT/$APP_NAME/node_modules ./node_modules
+COPY --from=base-build $APP_ROOT/$APP_NAME/dist ./dist
 
 CMD ["node", "dist"]
