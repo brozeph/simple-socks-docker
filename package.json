@@ -4,6 +4,8 @@
   "description": "A Docker image with a SOCKS5 server using the simple-socks NPM module",
   "main": "dist",
   "scripts": {
+    "build": "gulp build",
+    "lint": "gulp lint",
     "start": "gulp build && node dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

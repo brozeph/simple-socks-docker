@@ -32,8 +32,8 @@ ADD ./package.json .
 ADD ./.eslintrc.yml .
 ADD ./.babelrc .
 ADD ./gulpfile.babel.js .
+ADD ./settings ./settings
 ADD ./src ./src
-ADD ./test ./test
 
 RUN npm install && \
 		# lint and test
@@ -66,5 +66,6 @@ ADD ./package.json .
 ADD ./.babelrc .
 COPY --from=base-build $APP_ROOT/$APP_NAME/node_modules ./node_modules
 COPY --from=base-build $APP_ROOT/$APP_NAME/dist ./dist
+COPY --from=base-build $APP_ROOT/$APP_NAME/settings ./settings
 
 CMD ["node", "dist"]
