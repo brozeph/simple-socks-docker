@@ -1,0 +1,38 @@
+{
+  "name": "simple-socks-docker",
+  "version": "1.0.0",
+  "description": "A Docker image with a SOCKS5 server using the simple-socks NPM module",
+  "main": "dist",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brozeph/simple-socks-server.git"
+  },
+  "author": "https://github.com/brozeph",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/brozeph/simple-socks-server/issues"
+  },
+  "homepage": "https://github.com/brozeph/simple-socks-server#readme",
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/plugin-transform-runtime": "^7.2.0",
+    "@babel/preset-env": "^7.2.3",
+    "@babel/register": "^7.0.0",
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^10.0.1",
+    "eslint-plugin-babel": "^5.3.0",
+    "gulp": "^4.0.0",
+    "gulp-babel": "^8.0.0",
+    "gulp-clean": "^0.4.0",
+    "gulp-eslint": "^5.0.0",
+    "gulp-sourcemaps": "^2.6.4"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.2.5",
+    "@babel/runtime": "^7.2.0",
+    "simple-socks": "^1.0.1"
+  }
+}
